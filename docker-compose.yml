@@ -1,0 +1,49 @@
+services:
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: pass123
+      MYSQL_DATABASE: testdb
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./script.sql:/docker-entrypoint-initdb.d/script.sql:ro
+    networks:
+      - app_net
+
+  backend:
+    build:
+      context: ./backend
+    container_name: backend
+    environment:
+      DB_HOST: mysql          # IMPORTANT: service name, not localhost
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASSWORD: pass123
+      DB_NAME: testdb
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql
+    networks:
+      - app_net
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+    networks:
+      - app_net
+
+networks:
+  app_net:
+    driver: bridge
+
+volumes:
+  mysql_data:
