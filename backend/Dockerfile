@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 COPY package.json package-lock.json ./
 
 #Installing dependencies from package-lock.json
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 #Copying all files
 COPY . .
