@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and start containers
+        run: docker compose up -d --build
+
+      - name: Check backend is running
+        run: |
+          sleep 15
+          curl -f http://localhost:3000/user
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down
