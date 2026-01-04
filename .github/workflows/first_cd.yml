@@ -1,4 +1,4 @@
-name: First CD
+name: CD - Docker Hub
 
 on:
   workflow_run:
@@ -7,24 +7,39 @@ on:
       - completed
 
 jobs:
-    #checking if the previous workflow was successful
-  deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+  docker:
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Set up Docker
+
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Login to Docker
+
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      # Build + Push FRONTEND
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./frontend
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/my_first_docker_repo:v1.0
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/first-app-frontend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/first-app-frontend:${{ github.sha }}
+
+      # Build + Push BACKEND
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/first-app-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/first-app-backend:${{ github.sha }}

@@ -1,25 +1,36 @@
 name: First CI
 
 on:
-    push:
-        branches: ['dev']
+  push:
+    branches: ["dev"]
 
 jobs:
-    setup:
-        runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            - name: Set up Node.js
-              uses: actions/setup-node@v4
-              with:
-                node-version: '18'
-                cache: 'npm'
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
 
-            - name: Install dependencies
-              run: npm install
+      # Frontend
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
 
-            - name: Run tests
-              run: npm test
+      - name: Run frontend tests
+        working-directory: frontend
+        run: npm test --if-present
+
+      # Backend
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Run backend tests
+        working-directory: backend
+        run: npm test --if-present
