@@ -1,37 +1,25 @@
-name: CI
+name: First CI
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
+    push:
+        branches: ['pull_request']
 
 jobs:
-  build-and-run:
-    runs-on: ubuntu-latest
+    setup:
+        runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
 
-      - name: Build and start containers
-        run: docker compose up -d --build
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: '18'
+                cache: 'npm'
 
-      - name: Check backend is running
-        run: |
-          for i in {1..40}; do
-            if curl -fsS http://localhost:3000/user >/dev/null; then
-              echo "Backend is ready"
-              exit 0
-            fi
-            echo "Waiting for backend/db..."
-            sleep 3
-          done
+            - name: Install dependencies
+              run: npm install
 
-          echo "Backend did not become ready"
-          docker compose ps
-          docker compose logs mysql
-          docker compose logs backend
-          exit 1
-
-      - name: Stop containers
-        if: always()
-        run: docker compose down
+            - name: Run tests
+              run: npm test
