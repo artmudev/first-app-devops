@@ -2,7 +2,7 @@ name: First CI
 
 on:
     push:
-        branches: ['pull_request']
+        branches: ['dev']
 
 jobs:
     setup:
